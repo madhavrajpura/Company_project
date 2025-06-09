@@ -1,0 +1,30 @@
+@using DataAccessLayer.ViewModels
+@model PaginationViewModel<EmployeeViewModel>
+
+@if (Model.Items.Count == 0)
+{
+    <tr>
+        <td colspan="6" class="text-center text-danger fw-bold">No Records Found</td>
+    </tr>
+}
+else
+{
+    @foreach (var item in Model.Items)
+    {
+        <tr class="border border-end-0 border-start-0 border-top-0 border-bottom-1">
+
+            <td class="text-start OpenAttendenceId text-nowrap" data-id="@item.EmployeeId"># @item.EmployeeId</td>
+            <td class="text-start text-nowrap">@item.FirstName @item.LastName</td>
+            <td class="text-start text-nowrap">@item.Email</td>
+            <td class="text-start text-nowrap">@item.Department</td>
+            <td class="text-start text-nowrap">@item.Position</td>
+            <td class="text-start text-nowrap">
+                <i class="fa-solid fa-pen w-25 SaveEmployeeId" data-bs-toggle="modal" data-bs-target="#SaveEmployeeModal"
+                    data-id="@item.EmployeeId" title="Edit"></i>
+                <i class="fa-solid fa-trash-can ms-2 " data-bs-toggle="modal" data-bs-target="#DeleteEmployeeModal"
+                    data-id="@item.EmployeeId" onclick=GetIdForDeleteEmployee(this) title="Delete"></i>
+            </td>
+        </tr>
+    }
+}
+<input type="hidden" id="totalRecords" value="@Model.TotalCount" />
