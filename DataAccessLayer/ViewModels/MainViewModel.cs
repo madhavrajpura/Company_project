@@ -3,5 +3,5 @@ namespace DataAccessLayer.ViewModels;
 public class MainViewModel
 {
     public EmployeeViewModel employeeVM {get; set;}
-    public AttendenceViewModel attendenceVM {get; set;}
+    public AttendanceViewModel attendenceVM {get; set;}
 }

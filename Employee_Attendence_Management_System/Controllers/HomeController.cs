@@ -16,13 +16,17 @@ public class HomeController : Controller
         _employeeService = employeeService;
     }
 
-    public IActionResult Index()
+    public IActionResult Home()
     {
         return View();
     }
     public IActionResult GetEmployeeList(int pageNumber = 1, string search = "", int pageSize = 3, string sortColumn = "", string sortDirection = "")
     {
-        PaginationViewModel<EmployeeViewModel>? EmployeeList = _employeeService.GetEmployeeList(pageNumber, search, pageSize,sortColumn,sortDirection);
+        PaginationViewModel<EmployeeViewModel>? EmployeeList = _employeeService.GetEmployeeList(pageNumber, search, pageSize, sortColumn, sortDirection);
+        Dictionary<int, bool> attendanceStatus = _employeeService.GetAttendanceStatusForEmployees(EmployeeList.Items.Select(e => e.EmployeeId).ToList(), DateTime.Today);
+        ViewBag.AttendanceStatus = attendanceStatus;
+        // PaginationViewModel<EmployeeViewModel>? EmployeeList = _employeeService.GetEmployeeList(pageNumber, search, pageSize, sortColumn, sortDirection);
+        // return PartialView("_EmployeeListPartial", EmployeeList);
         return PartialView("_EmployeeListPartial", EmployeeList);
     }
 
@@ -63,6 +67,68 @@ public class HomeController : Controller
             return Json(new { success = true, text = "Employee Deleted successfully" });
         }
         return Json(new { success = false, text = "Failed to delete Employee.Try again!" });
+    }
+
+    // NEW FROM HERE --------------------------------------------------------
+
+    [HttpGet]
+    public IActionResult GetAttendance(int employeeId, int attendanceId)
+    {
+        AttendanceViewModel attendanceVM = new AttendanceViewModel();
+
+        if (attendanceId == 0)
+        {
+            attendanceVM = new AttendanceViewModel();
+        }
+        else
+        {
+            attendanceVM = _employeeService.GetAttendanceByEmployeeIdAndDate(employeeId, attendanceId, DateTime.Today);
+        }
+        return PartialView("_AttendancePartial", attendanceVM);
+    }
+
+    [HttpPost]
+    public IActionResult SaveAttendance([FromForm] AttendanceViewModel attendanceVM)
+    {
+        bool saveStatus = _employeeService.SaveAttendance(attendanceVM);
+        return Json(saveStatus
+            ? new { success = true, text = "Attendance saved successfully" }
+            : new { success = false, text = "Failed to save attendance. Check if already exists!" });
+    }
+
+    [HttpPost]
+    public IActionResult DeleteAttendance(int employeeId)
+    {
+        bool deleteStatus = _employeeService.DeleteAttendance(employeeId, DateTime.Today);
+        return Json(deleteStatus
+            ? new { success = true, text = "Attendance deleted successfully" }
+            : new { success = false, text = "Failed to delete attendance." });
+    }
+
+    // Add this new action for the attendance report
+    public IActionResult AttendanceReport()
+    {
+        // Get all active employees and convert to SelectList
+        var employees = _employeeService.GetAllEmployees()
+            .Select(e => new SelectListItem
+            {
+                Value = e.EmployeeId.ToString(),
+                Text = $"{e.FirstName} {e.LastName}"
+            })
+            .ToList();
+
+        // Make sure to pass an empty list if no employees found
+        ViewBag.Employees = employees ?? new List<SelectListItem>();
+
+        return View();
+    }
+
+
+    [HttpPost]
+    public IActionResult GetAttendanceReport(int employeeId, DateTime startDate, DateTime endDate)
+    {
+        var reportData = _employeeService.GetAttendanceReport(employeeId, startDate, endDate);
+        return PartialView("_AttendanceReportPartial", reportData);
     }
 
 }

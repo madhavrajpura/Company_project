@@ -1,0 +1,91 @@
+@model IEnumerable<DataAccessLayer.ViewModels.AttendanceViewModel>
+
+<div class="container-fluid p-4">
+    <h2 class="custom-text-color">Attendance Report</h2>
+
+    <div class="row mb-4">
+        <div class="col-md-4">
+            <div class="form-group">
+                <label>Employee</label>
+                @{
+                    var employees = ViewBag.Employees as List<SelectListItem> ?? new List<SelectListItem>();
+                }
+                <select id="EmployeeId" class="form-control">
+                    <option value="">All Employees</option>
+                    @foreach (var employee in employees)
+                    {
+                        <option value="@employee.Value">@employee.Text</option>
+                    }
+                </select>
+            </div>
+        </div>
+
+        <div class="col-md-3">
+            <div class="form-group">
+                <label>Start Date</label>
+                <input type="date" id="startDate" class="form-control" />
+            </div>
+        </div>
+
+        <div class="col-md-3">
+            <div class="form-group">
+                <label>End Date</label>
+                <input type="date" id="endDate" class="form-control" />
+            </div>
+        </div>
+
+        <div class="col-md-2 d-flex align-items-end">
+            <button id="filterBtn" class="btn solid-btn">Filter</button>
+        </div>
+    </div>
+
+    <div id="reportResults">
+        @await Html.PartialAsync("_AttendanceReportPartial", Model)
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        $(document).ready(function () {
+            // Set default dates (today -30 days to today)
+            var endDate = new Date();
+            var startDate = new Date();
+            startDate.setDate(startDate.getDate() - 30);
+
+            $('#startDate').val(startDate.toISOString().split('T')[0]);
+            $('#endDate').val(endDate.toISOString().split('T')[0]);
+
+            // Load initial data
+            loadReportData();
+
+            $('#filterBtn').click(function () {
+                loadReportData();
+            });
+
+            function loadReportData() {
+                var employeeId = $('#EmployeeId').val();
+                var startDate = $('#startDate').val();
+                var endDate = $('#endDate').val();
+
+                console.log("startDate:", startDate, "endDate:", endDate, "employeeId:", employeeId);
+
+                $.ajax({
+                    url: "/Home/GetAttendanceReport",
+                    type: 'POST',
+                    data: {
+                        employeeId: employeeId,
+                        startDate: startDate,
+                        endDate: endDate
+                    },
+                    success: function (data) {
+                        $('#reportResults').html(data);
+                    },
+                    error: function (xhr, status, error) {
+                        console.error('Error fetching report:', error);
+                        $('#reportResults').html('<div class="alert alert-danger">An error occurred while fetching the report.</div>');
+                    }
+                });
+            }
+        });
+    </script>
+}

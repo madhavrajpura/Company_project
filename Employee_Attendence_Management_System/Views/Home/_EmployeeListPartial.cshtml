@@ -1,4 +1,4 @@
-@using DataAccessLayer.ViewModels
+@* @using DataAccessLayer.ViewModels
 @model PaginationViewModel<EmployeeViewModel>
 
 @if (Model.Items.Count == 0)
@@ -23,6 +23,72 @@ else
                     data-id="@item.EmployeeId" title="Edit"></i>
                 <i class="fa-solid fa-trash-can ms-2 " data-bs-toggle="modal" data-bs-target="#DeleteEmployeeModal"
                     data-id="@item.EmployeeId" onclick=GetIdForDeleteEmployee(this) title="Delete"></i>
+            </td>
+        </tr>
+    }
+}
+<input type="hidden" id="totalRecords" value="@Model.TotalCount" /> *@
+
+@using DataAccessLayer.ViewModels
+@model PaginationViewModel<EmployeeViewModel>
+
+@if (Model.Items.Count == 0)
+{
+    <tr>
+        <td colspan="6" class="text-center text-danger fw-bold">No Records Found</td>
+    </tr>
+}
+else
+{
+    @foreach (var item in Model.Items)
+    {
+        var hasAttendanceToday = ViewBag.AttendanceStatus != null && ViewBag.AttendanceStatus.ContainsKey(item.EmployeeId) &&
+        ViewBag.AttendanceStatus[item.EmployeeId];
+        <tr class="border border-end-0 border-start-0 border-top-0 border-bottom-1 @(hasAttendanceToday ? "table-success" : "")">
+            <td class="text-start text-nowrap"># @item.EmployeeId</td>
+            <td class="text-start text-nowrap OpenAttendanceModal" 
+                data-id="@item.EmployeeId" 
+                data-attenid="@item.AttendanceId"
+                data-bs-toggle="modal" 
+                data-bs-target="#AttendanceModal" 
+                style="cursor: pointer;" 
+                title="Manage Attendance">
+                @item.FirstName @item.LastName
+                @if (hasAttendanceToday)
+                {
+                    <span class="badge bg-success ms-2">Present</span>
+                }
+            </td>
+            <td class="text-start text-nowrap">@item.Email</td>
+            <td class="text-start text-nowrap">@item.Department</td>
+            <td class="text-start text-nowrap">@item.Position</td>
+            <td class="text-start text-nowrap">
+                <i class="fa-solid fa-pen w-25 SaveEmployeeId" 
+                   data-bs-toggle="modal" 
+                   data-bs-target="#SaveEmployeeModal"
+                   data-id="@item.EmployeeId" 
+                   title="Edit Employee"></i>
+                <i class="fa-solid fa-trash-can ms-2" 
+                   data-bs-toggle="modal" 
+                   data-bs-target="#DeleteEmployeeModal"
+                   data-id="@item.EmployeeId" 
+                   onclick="GetIdForDeleteEmployee(this)" 
+                   title="Delete Employee"></i>
+                @if (hasAttendanceToday)
+                {
+                    <i class="fa-solid fa-clock-rotate-left ms-2 OpenAttendanceModal"
+                       data-id="@item.EmployeeId"
+                       data-attenid="@item.AttendanceId"
+                       data-bs-toggle="modal"
+                       data-bs-target="#AttendanceModal"
+                       title="Edit Attendance"></i>
+                    <i class="fa-solid fa-trash ms-2 delete-attendance" 
+                       data-id="@item.EmployeeId" 
+                       data-bs-toggle="modal"
+                       data-bs-target="#DeleteAttendanceModal" 
+                       title="Delete Attendance"
+                       onclick="GetIdForDeleteAttendance(this)"></i>
+                }
             </td>
         </tr>
     }

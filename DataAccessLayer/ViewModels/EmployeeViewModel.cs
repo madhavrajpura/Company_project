@@ -5,6 +5,7 @@ namespace DataAccessLayer.ViewModels;
 public class EmployeeViewModel
 {
     public int EmployeeId { get; set; }
+    public int AttendanceId { get; set; }
 
     [Required(AllowEmptyStrings = false, ErrorMessage = "First Name is required")]
     [RegularExpression(@"^[a-zA-Z]+$", ErrorMessage = "First Name must contain only alphabets")]
@@ -24,4 +25,6 @@ public class EmployeeViewModel
     [Required(ErrorMessage = "Position is required")]
     [StringLength(50, ErrorMessage = "Position cannot exceed 50 characters.")]
     public string? Position { get; set; }
+    public string FullName => FirstName + " " + LastName;
+
 }

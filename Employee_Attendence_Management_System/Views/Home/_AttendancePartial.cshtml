@@ -1,0 +1,84 @@
+@model DataAccessLayer.ViewModels.AttendanceViewModel
+
+<div class="modal-content">
+    <div class="modal-header">
+        <h5 class="modal-title fs-5 fw-bold text-secondary">Manage Attendance</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+    </div>
+    <div class="modal-body">
+        <form id="AttendanceForm">
+            <input type="hidden" asp-for="AttendanceId" />
+            <input type="hidden" asp-for="EmployeeId" />
+            <div class="mb-3">
+                <label asp-for="Date" class="form-label">Date</label>
+                <input asp-for="Date" class="form-control" type="date" id="Date" />
+                <span asp-validation-for="Date" class="text-danger"></span>
+            </div>
+            <div class="mb-3">
+                <label asp-for="CheckInTime" class="form-label">Check-In Time</label>
+                <input asp-for="CheckInTime" class="form-control" type="time" />
+                <span asp-validation-for="CheckInTime" class="text-danger"></span>
+            </div>
+            <div class="mb-3">
+                <label asp-for="CheckOutTime" class="form-label">Check-Out Time</label>
+                <input asp-for="CheckOutTime" class="form-control" type="time" />
+                <span asp-validation-for="CheckOutTime" class="text-danger"></span>
+            </div>
+            <div class="modal-footer">
+                <button type="submit" class="btn solid-btn">Save</button>
+                <button type="button" class="btn hollow-btn" data-bs-dismiss="modal">Cancel</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<partial name="_ValidationScriptsPartial" />
+
+<script>
+
+    var Model = @Html.Raw(Json.Serialize(Model));
+
+    $(document).ready(function () {
+
+        console.log(Model, "Model");
+
+        const today = new Date().toISOString().split('T')[0];
+
+        if (Model.attendanceId == 0) {
+            $("#Date").val(today);
+            $("#Date").attr('max', today);
+        }
+    });
+
+    // Save Attendance
+    $("#AttendanceForm").on("submit", function (e) {
+        e.preventDefault();
+
+        let form = $("#AttendanceForm");
+
+        if (form.valid()) {
+
+            let formData = new FormData(this);
+            $.ajax({
+                url: "/Home/SaveAttendance",
+                type: "POST",
+                contentType: false,
+                processData: false,
+                data: formData,
+                success: function (data) {
+                    if (data.success) {
+                        callSuccessToaster(data.text);
+                        $("#AttendanceModal").modal("hide");
+                        Pagination(currentPage, searchText, pageSize, sortColumn, sortDirection);
+                    } else {
+                        callErrorToaster(data.text);
+                    }
+                },
+                error: function () {
+                    callErrorToaster("Error saving attendance");
+                }
+            });
+        }
+    });
+
+</script>

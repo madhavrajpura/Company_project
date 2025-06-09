@@ -51,7 +51,7 @@ public class EmployeeService : IEmployeeService
 
     public EmployeeViewModel GetEmployeeById(int id)
     {
-        return _employeeRepository.GetEmployeeById(id); ;
+        return _employeeRepository.GetEmployeeById(id);
     }
 
     public bool SaveEmployee(EmployeeViewModel employeeVM)
@@ -62,6 +62,36 @@ public class EmployeeService : IEmployeeService
     public bool DeleteEmployee(int employeeid)
     {
         return _employeeRepository.DeleteEmployee(employeeid);
+    }
+
+    // NEW FROM HERE --------------------------------------------------------
+    public AttendanceViewModel GetAttendanceByEmployeeIdAndDate(int employeeId, int attendanceId, DateTime date)
+    {
+        return _employeeRepository.GetAttendanceByEmployeeIdAndDate(employeeId, attendanceId, date);
+    }
+
+    public bool SaveAttendance(AttendanceViewModel attendanceVM)
+    {
+        return _employeeRepository.SaveAttendance(attendanceVM);
+    }
+
+    public bool DeleteAttendance(int employeeId, DateTime date)
+    {
+        return _employeeRepository.DeleteAttendance(employeeId, date);
+    }
+
+    public Dictionary<int, bool> GetAttendanceStatusForEmployees(List<int> employeeIds, DateTime date)
+    {
+        return _employeeRepository.GetAttendanceStatusForEmployees(employeeIds, date);
+    }
+
+    public List<EmployeeViewModel> GetAllEmployees()
+    {
+        return _employeeRepository.GetAllEmployees();
+    }
+    public List<AttendanceViewModel> GetAttendanceReport(int employeeId, DateTime startDate, DateTime endDate)
+    {
+        return _employeeRepository.GetAttendanceReport(employeeId, startDate, endDate);
     }
 
 }
