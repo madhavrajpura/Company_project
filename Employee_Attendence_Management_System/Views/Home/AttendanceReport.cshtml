@@ -1,53 +1,65 @@
-@model IEnumerable<DataAccessLayer.ViewModels.AttendanceViewModel>
+@model List<DataAccessLayer.ViewModels.AttendanceViewModel>
 
 <div class="container-fluid p-4">
-    <h2 class="custom-text-color">Attendance Report</h2>
+
+    <div class="d-flex justify-content-between">
+        <h3 class="custom-text-color">Attendance Report</h3>
+        <a asp-action="Homes" asp-controller="Home" class="btn solid-btn text-decoration-none" title="Back to Home">
+            < Back</a>
+    </div>
 
     <div class="row mb-4">
-        <div class="col-md-4">
-            <div class="form-group">
-                <label>Employee</label>
+        <div class="col-md-4 mt-4">
+            <div class="form-floating">
                 @{
                     var employees = ViewBag.Employees as List<SelectListItem> ?? new List<SelectListItem>();
                 }
-                <select id="EmployeeId" class="form-control">
+                <select id="EmployeeId" class="form-select ">
                     <option value="">All Employees</option>
                     @foreach (var employee in employees)
                     {
                         <option value="@employee.Value">@employee.Text</option>
                     }
                 </select>
+                <label>Employee</label>
             </div>
         </div>
 
-        <div class="col-md-3">
-            <div class="form-group">
-                <label>Start Date</label>
+        <div class="col-md-3 col-sm-6 mt-4">
+            <div class="form-floating">
                 <input type="date" id="startDate" class="form-control" />
+                <label>Start Date</label>
             </div>
         </div>
 
-        <div class="col-md-3">
-            <div class="form-group">
-                <label>End Date</label>
+        <div class="col-md-3 col-sm-6 mt-4">
+            <div class="form-floating">
                 <input type="date" id="endDate" class="form-control" />
+                <label>End Date</label>
             </div>
         </div>
 
-        <div class="col-md-2 d-flex align-items-end">
-            <button id="filterBtn" class="btn solid-btn">Filter</button>
+        <div class="col-md-2 col d-flex align-items-end gap-2 mt-4">
+            <button id="filterBtn" class="btn solid-btn ps-4 pe-4 h-100">Filter</button>
+            <button id="clearBtn" class="btn hollow-btn ps-4 pe-4 h-100">Clear</button>
         </div>
     </div>
 
-    <div id="reportResults">
+    <div id="Report_Content">
         @await Html.PartialAsync("_AttendanceReportPartial", Model)
     </div>
 </div>
 
+
+<partial name="_Toaster" />
+
 @section Scripts {
+
     <script>
+
+        // start of READY
         $(document).ready(function () {
-            // Set default dates (today -30 days to today)
+
             var endDate = new Date();
             var startDate = new Date();
             startDate.setDate(startDate.getDate() - 30);
@@ -55,37 +67,39 @@
             $('#startDate').val(startDate.toISOString().split('T')[0]);
             $('#endDate').val(endDate.toISOString().split('T')[0]);
 
-            // Load initial data
+            // Initial load for the Attendance Report.
             loadReportData();
-
-            $('#filterBtn').click(function () {
-                loadReportData();
-            });
 
             function loadReportData() {
                 var employeeId = $('#EmployeeId').val();
                 var startDate = $('#startDate').val();
                 var endDate = $('#endDate').val();
 
-                console.log("startDate:", startDate, "endDate:", endDate, "employeeId:", employeeId);
-
                 $.ajax({
                     url: "/Home/GetAttendanceReport",
                     type: 'POST',
-                    data: {
-                        employeeId: employeeId,
-                        startDate: startDate,
-                        endDate: endDate
-                    },
+                    data: { employeeId: employeeId, startDate: startDate, endDate: endDate },
                     success: function (data) {
-                        $('#reportResults').html(data);
+                        $('#Report_Content').html(data);
                     },
-                    error: function (xhr, status, error) {
-                        console.error('Error fetching report:', error);
-                        $('#reportResults').html('<div class="alert alert-danger">An error occurred while fetching the report.</div>');
+                    error: function () {
+                        $('#Report_Content').html('<div class="alert alert-danger">An error occurred while fetching the report.</div>');
+                        callErrorToaster("Error Fetching Attendance Report.");
                     }
                 });
             }
+
+            $('#filterBtn').click(function () {
+                loadReportData();
+            });
+
+            $('#clearBtn').click(function () {
+                $('#EmployeeId').val('');
+                $('#startDate').val(startDate.toISOString().split('T')[0]);
+                $('#endDate').val(endDate.toISOString().split('T')[0]);
+                loadReportData();
+            });
         });
+        // End of READY
     </script>
 }

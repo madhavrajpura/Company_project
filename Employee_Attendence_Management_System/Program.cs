@@ -3,6 +3,7 @@ using BusinessLogicLayer.Services.Interfaces;
 using DataAccessLayer.Models;
 using DataAccessLayer.Repository.Implementations;
 using DataAccessLayer.Repository.Interfaces;
+using Employee_Attendence_Management_System.MiddleWare;
 using Microsoft.EntityFrameworkCore;
 using Serilog;
 
@@ -42,13 +43,16 @@ var app = builder.Build();
 // Configure the HTTP request pipeline.
 if (!app.Environment.IsDevelopment())
 {
-    app.UseExceptionHandler("/Home/Error");
+    app.UseExceptionHandler("/Home/HandleErrorWithToaster{Something went wrong. Please try again later.}");
     // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
     app.UseHsts();
 }
 
 app.UseHttpsRedirection();
+
 app.UseStaticFiles();
+
+app.UseMiddleware<ExceptionHandler>();
 
 app.UseRouting();
 
@@ -56,6 +60,6 @@ app.UseAuthorization();
 
 app.MapControllerRoute(
     name: "default",
-    pattern: "{controller=Home}/{action=Home}/{id?}");
+    pattern: "{controller=Home}/{action=Homes}/{id?}");
 
 app.Run();

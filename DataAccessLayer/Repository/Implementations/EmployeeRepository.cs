@@ -13,28 +13,12 @@ public class EmployeeRepository : IEmployeeRepository
         _db = db;
     }
 
+    #region Employee CRUD
+
     public IQueryable<EmployeeViewModel> GetEmployeeData()
     {
-        IQueryable<EmployeeViewModel> query = _db.Employees
-          .Where(x => !x.IsDeleted)
-          .Select(x => new EmployeeViewModel
-          {
-              EmployeeId = x.Id,
-              AttendanceId = x.Attendences.Where(t => !t.IsDeleted).Select(t => t.Id).FirstOrDefault(),
-              FirstName = x.FirstName,
-              LastName = x.LastName,
-              Email = x.Email,
-              Department = x.Department,
-              Position = x.Position
-          })
-          .AsQueryable().OrderBy(x => x.EmployeeId);
-
-        return query;
-    }
-
-    public EmployeeViewModel GetEmployeeById(int id)
-    {
-        EmployeeViewModel? employee = _db.Employees.Where(t => t.Id == id && !t.IsDeleted)
+        return _db.Employees
+            .Where(x => !x.IsDeleted)
             .Select(x => new EmployeeViewModel
             {
                 EmployeeId = x.Id,
@@ -44,13 +28,25 @@ public class EmployeeRepository : IEmployeeRepository
                 Email = x.Email,
                 Department = x.Department,
                 Position = x.Position
-            }).AsQueryable().FirstOrDefault();
+            })
+            .OrderBy(x => x.EmployeeId);
+    }
 
-        if (employee == null)
-        {
-            return null!;
-        }
-        return employee;
+    public EmployeeViewModel GetEmployeeById(int id)
+    {
+        return _db.Employees
+.Where(t => t.Id == id && !t.IsDeleted)
+            .Select(x => new EmployeeViewModel
+            {
+                EmployeeId = x.Id,
+                AttendanceId = x.Attendences.Where(t => !t.IsDeleted).Select(t => t.Id).FirstOrDefault(),
+                FirstName = x.FirstName,
+                LastName = x.LastName,
+                Email = x.Email,
+                Department = x.Department,
+                Position = x.Position
+            })
+            .FirstOrDefault() ?? new EmployeeViewModel();
     }
 
     public bool SaveEmployee(EmployeeViewModel employeeVM)
@@ -71,11 +67,8 @@ public class EmployeeRepository : IEmployeeRepository
         else
         {
             Employee? ExistEmployee = _db.Employees.FirstOrDefault(x => x.Id == employeeVM.EmployeeId && !x.IsDeleted);
+            if (ExistEmployee == null) return false;
 
-            if (ExistEmployee == null)
-            {
-                return false;
-            }
             ExistEmployee.FirstName = employeeVM.FirstName;
             ExistEmployee.LastName = employeeVM.LastName;
             ExistEmployee.Email = employeeVM.Email;
@@ -102,73 +95,87 @@ public class EmployeeRepository : IEmployeeRepository
 
     public bool CheckExists(EmployeeViewModel employeeVM)
     {
-        if (employeeVM.EmployeeId == 0)
-        {
-            return _db.Employees.Any(x => x.Email.ToLower().Trim() == employeeVM.Email.ToLower().Trim() && !x.IsDeleted);
-        }
-        else
-        {
-            return _db.Employees.Any(x => x.Id != employeeVM.EmployeeId && x.Email.ToLower().Trim() == employeeVM.Email.ToLower().Trim() && !x.IsDeleted);
-        }
-    }
-    // NEW FROM HERE ---------------------------------------------------------------------
-
-    public AttendanceViewModel GetAttendanceByEmployeeIdAndDate(int employeeId, int attendanceId, DateTime date)
-    {
-        AttendanceViewModel? Attendence = _db.Attendences.Where(t => t.EmployeeId == employeeId && t.Id == attendanceId && t.Date.Date == date.Date && !t.IsDeleted)
-            .Select(x => new AttendanceViewModel
-            {
-                EmployeeId = x.EmployeeId,
-                AttendanceId = x.Id,
-                Date = x.Date,
-                CheckInTime = x.CheckInTime,
-                CheckOutTime = x.CheckOutTime,
-            }).AsQueryable().FirstOrDefault();
-
-        if (Attendence == null)
-        {
-            return null!;
-        }
-        return Attendence;
+        return _db.Employees.Any(x =>
+x.Email.ToLower().Trim() == employeeVM.Email.ToLower().Trim() &&
+            !x.IsDeleted &&
+(employeeVM.EmployeeId == 0 || x.Id != employeeVM.EmployeeId));
     }
 
-    public bool SaveAttendance(AttendanceViewModel attendanceVM)
+    #endregion
+
+    #region Attendance CRUD
+
+    public EmployeeAttendanceViewModel GetAttendanceByEmployeeIdAndDate(int employeeId, int attendanceId)
     {
-        if (attendanceVM.AttendanceId == 0)
-        {
-            Attendence attendence = new Attendence
+        var attendance = _db.Attendences
+.Where(t => t.EmployeeId == employeeId && t.Id == attendanceId && !t.IsDeleted)
+            .Select(x => new EmployeeAttendanceViewModel
             {
-                CheckInTime = attendanceVM.CheckInTime,
-                CheckOutTime = attendanceVM.CheckOutTime,
-                Date = attendanceVM.Date,
-                EmployeeId = attendanceVM.EmployeeId,
-                IsDeleted = false
+                NewAttendance = new AttendanceViewModel
+                {
+                    AttendanceId = x.Id,
+                    EmployeeId = x.EmployeeId,
+                    CheckInTime = x.CheckInTime,
+                    CheckOutTime = x.CheckOutTime,
+                    Date = x.Date
+                },
+                AttendanceHistory = _db.Attendences
+                    .Where(a => a.EmployeeId == employeeId && !a.IsDeleted)
+.OrderByDescending(a => a.Date)
+                    .Select(a => new AttendanceViewModel
+                    {
+                        AttendanceId = a.Id,
+                        EmployeeId = a.EmployeeId,
+                        Date = a.Date,
+                        CheckInTime = a.CheckInTime,
+                        CheckOutTime = a.CheckOutTime
+                    })
+                    .ToList()
+            })
+            .FirstOrDefault() ?? new EmployeeAttendanceViewModel
+            {
+                NewAttendance = new AttendanceViewModel { EmployeeId = employeeId },
+                AttendanceHistory = GetAttendanceHistory(employeeId)
             };
-            _db.Attendences.Add(attendence);
-        }
-        else
+
+        return attendance;
+    }
+
+    public bool AddAttendance(EmployeeAttendanceViewModel MainVM)
+    {
+        Attendence attendance = new Attendence
         {
-            Attendence? Existattendence = _db.Attendences.FirstOrDefault(x => x.Id == attendanceVM.AttendanceId && x.EmployeeId == attendanceVM.EmployeeId && !x.IsDeleted);
-
-            if (Existattendence == null)
-            {
-                return false;
-            }
-            Existattendence.CheckInTime = attendanceVM.CheckInTime;
-            Existattendence.CheckOutTime = attendanceVM.CheckOutTime;
-            Existattendence.Date = attendanceVM.Date;
-            Existattendence.EmployeeId = attendanceVM.EmployeeId;
-            _db.Attendences.Update(Existattendence);
-        }
-
+            CheckInTime = MainVM.NewAttendance.CheckInTime,
+            CheckOutTime = MainVM.NewAttendance.CheckOutTime,
+            Date = MainVM.NewAttendance.Date,
+            EmployeeId = MainVM.NewAttendance.EmployeeId,
+            IsDeleted = false
+        };
+        _db.Attendences.Add(attendance);
         _db.SaveChanges();
         return true;
     }
 
-    public bool DeleteAttendance(int employeeId, DateTime date)
+    public bool UpdateAttendance(EmployeeAttendanceViewModel MainVM)
+    {
+        Attendence? existingAttendance = _db.Attendences
+.FirstOrDefault(x => x.Id == MainVM.NewAttendance.AttendanceId && x.EmployeeId == MainVM.NewAttendance.EmployeeId && !x.IsDeleted);
+
+        if (existingAttendance == null) return false;
+
+        existingAttendance.CheckInTime = MainVM.NewAttendance.CheckInTime;
+        existingAttendance.CheckOutTime = MainVM.NewAttendance.CheckOutTime;
+        existingAttendance.Date = MainVM.NewAttendance.Date;
+        existingAttendance.EmployeeId = MainVM.NewAttendance.EmployeeId;
+        _db.Attendences.Update(existingAttendance);
+        _db.SaveChanges();
+        return true;
+    }
+
+    public bool DeleteAttendance(int employeeId, int attendanceId)
     {
         var attendance = _db.Attendences
-            .FirstOrDefault(a => a.EmployeeId == employeeId && a.Date.Date == date.Date && !a.IsDeleted);
+.FirstOrDefault(a => a.EmployeeId == employeeId && a.Id == attendanceId && !a.IsDeleted);
 
         if (attendance != null)
         {
@@ -182,26 +189,29 @@ public class EmployeeRepository : IEmployeeRepository
     public Dictionary<int, bool> GetAttendanceStatusForEmployees(List<int> employeeIds, DateTime date)
     {
         var attendanceRecords = _db.Attendences
-            .Where(a => employeeIds.Contains(a.EmployeeId) && a.Date.Date == date.Date && !a.IsDeleted)
+.Where(a => employeeIds.Contains(a.EmployeeId) && a.Date.Date == date.Date && !a.IsDeleted)
             .Select(a => a.EmployeeId)
             .ToList();
 
         return employeeIds.ToDictionary(id => id, id => attendanceRecords.Contains(id));
     }
 
-    // Add these methods to your repository
+    #endregion
+
+    #region Attendance Report
+
     public List<EmployeeViewModel> GetAllEmployees()
     {
         return _db.Employees
-            .Where(x => !x.IsDeleted)
-            .Select(x => new EmployeeViewModel
+            .Where(e => !e.IsDeleted)
+            .Select(e => new EmployeeViewModel
             {
-                EmployeeId = x.Id,
-                FirstName = x.FirstName,
-                LastName = x.LastName,
-                Email = x.Email,
-                Department = x.Department,
-                Position = x.Position
+                EmployeeId = e.Id,
+                FirstName = e.FirstName,
+                LastName = e.LastName,
+                Email = e.Email,
+                Department = e.Department,
+                Position = e.Position
             })
             .ToList() ?? new List<EmployeeViewModel>();
     }
@@ -209,9 +219,7 @@ public class EmployeeRepository : IEmployeeRepository
     public List<AttendanceViewModel> GetAttendanceReport(int employeeId, DateTime startDate, DateTime endDate)
     {
         var query = _db.Attendences
-            .Where(a => !a.IsDeleted &&
-                       a.Date >= startDate &&
-                       a.Date <= endDate);
+.Where(a => !a.IsDeleted && a.Date >= startDate && a.Date <= endDate);
 
         if (employeeId > 0)
         {
@@ -231,4 +239,30 @@ public class EmployeeRepository : IEmployeeRepository
             .ToList();
     }
 
+    #endregion
+
+    public List<AttendanceViewModel> GetAttendanceHistory(int employeeId)
+    {
+        return _db.Attendences
+            .Where(a => a.EmployeeId == employeeId && !a.IsDeleted)
+.OrderByDescending(a => a.Date)
+            .Select(a => new AttendanceViewModel
+            {
+                AttendanceId = a.Id,
+                EmployeeId = a.EmployeeId,
+                Date = a.Date,
+                CheckInTime = a.CheckInTime,
+                CheckOutTime = a.CheckOutTime
+            })
+            .ToList() ?? new List<AttendanceViewModel>();
+    }
+
+    public bool CheckAttendanceExists(EmployeeAttendanceViewModel MainVM)
+    {
+        return _db.Attendences.Any(x =>
+            x.EmployeeId == MainVM.NewAttendance.EmployeeId &&
+x.Date.Date == MainVM.NewAttendance.Date.Date &&
+            !x.IsDeleted &&
+(MainVM.NewAttendance.AttendanceId == 0 || x.Id != MainVM.NewAttendance.AttendanceId));
+    }
 }

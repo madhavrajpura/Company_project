@@ -1,6 +1,6 @@
-using BusinessLogicLayer.Services.Interfaces;
 using DataAccessLayer.Repository.Interfaces;
 using DataAccessLayer.ViewModels;
+using BusinessLogicLayer.Services.Interfaces;
 
 namespace BusinessLogicLayer.Services.Implementations;
 
@@ -13,7 +13,7 @@ public class EmployeeService : IEmployeeService
         _employeeRepository = employeeRepository;
     }
 
-    public PaginationViewModel<EmployeeViewModel> GetEmployeeList(int pageNumber = 1, string search = "", int pageSize = 3, string sortColumn = "", string sortDirection = "")
+    public PaginationViewModel<EmployeeViewModel> GetEmployeeList(int pageNumber, string search, int pageSize, string sortColumn, string sortDirection)
     {
         var query = _employeeRepository.GetEmployeeData();
 
@@ -59,25 +59,34 @@ public class EmployeeService : IEmployeeService
         return _employeeRepository.SaveEmployee(employeeVM);
     }
 
-    public bool DeleteEmployee(int employeeid)
+    public bool DeleteEmployee(int employeeId)
     {
-        return _employeeRepository.DeleteEmployee(employeeid);
+        return _employeeRepository.DeleteEmployee(employeeId);
     }
 
-    // NEW FROM HERE --------------------------------------------------------
-    public AttendanceViewModel GetAttendanceByEmployeeIdAndDate(int employeeId, int attendanceId, DateTime date)
+    public bool CheckExists(EmployeeViewModel employeeVM)
     {
-        return _employeeRepository.GetAttendanceByEmployeeIdAndDate(employeeId, attendanceId, date);
+        return _employeeRepository.CheckExists(employeeVM);
     }
 
-    public bool SaveAttendance(AttendanceViewModel attendanceVM)
+    public EmployeeAttendanceViewModel GetAttendanceByEmployeeIdAndDate(int employeeId, int attendanceId)
     {
-        return _employeeRepository.SaveAttendance(attendanceVM);
+        return _employeeRepository.GetAttendanceByEmployeeIdAndDate(employeeId, attendanceId);
     }
 
-    public bool DeleteAttendance(int employeeId, DateTime date)
+    public bool AddAttendance(EmployeeAttendanceViewModel mainVM)
     {
-        return _employeeRepository.DeleteAttendance(employeeId, date);
+        return _employeeRepository.AddAttendance(mainVM);
+    }
+
+    public bool UpdateAttendance(EmployeeAttendanceViewModel mainVM)
+    {
+        return _employeeRepository.UpdateAttendance(mainVM);
+    }
+
+    public bool DeleteAttendance(int employeeId, int attendanceId)
+    {
+        return _employeeRepository.DeleteAttendance(employeeId, attendanceId);
     }
 
     public Dictionary<int, bool> GetAttendanceStatusForEmployees(List<int> employeeIds, DateTime date)
@@ -89,9 +98,19 @@ public class EmployeeService : IEmployeeService
     {
         return _employeeRepository.GetAllEmployees();
     }
+
     public List<AttendanceViewModel> GetAttendanceReport(int employeeId, DateTime startDate, DateTime endDate)
     {
         return _employeeRepository.GetAttendanceReport(employeeId, startDate, endDate);
     }
 
+    public List<AttendanceViewModel> GetAttendanceHistory(int employeeId)
+    {
+        return _employeeRepository.GetAttendanceHistory(employeeId);
+    }
+
+    public bool CheckAttendanceExists(EmployeeAttendanceViewModel mainVM)
+    {
+        return _employeeRepository.CheckAttendanceExists(mainVM);
+    }
 }

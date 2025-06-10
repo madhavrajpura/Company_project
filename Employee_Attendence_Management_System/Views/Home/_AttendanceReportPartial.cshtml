@@ -6,30 +6,32 @@
 }
 else
 {
-    <div class="table-responsive">
+    <div class="table-responsive p-3 bg-white shadow rounded">
         <table class="table table-striped">
             <thead>
                 <tr>
-                    <th>Date</th>
-                    <th>Employee</th>
-                    <th>Check-In</th>
-                    <th>Check-Out</th>
-                    <th>Hours Worked</th>
+                    <th class="text-nowrap"># Employee ID</th>
+                    <th class="text-nowrap">Name</th>
+                    <th class="text-nowrap">Date</th>
+                    <th class="text-nowrap">Check-In</th>
+                    <th class="text-nowrap">Check-Out</th>
+                    <th class="text-nowrap">Hours Worked</th>
                 </tr>
             </thead>
             <tbody>
                 @foreach (var item in Model)
                 {
                     <tr>
-                        <td>@item.Date.ToString("yyyy-MM-dd")</td>
-                        <td>@item.EmployeeName</td>
-                        <td>@item.CheckInTime.ToString("HH:mm")</td>
-                        <td>@(item.CheckOutTime != null ? item.CheckOutTime.ToString("HH:mm") : "-")</td>
-                        <td>
+                        <td class="text-nowrap"># @item.EmployeeId</td>
+                        <td class="text-nowrap">@item.EmployeeName</td>
+                        <td class="text-nowrap">@item.Date.ToString("yyyy-MM-dd")</td>
+                        <td class="text-nowrap">@item.CheckInTime.ToString("HH:mm tt")</td>
+                        <td class="text-nowrap">@(item.CheckOutTime != null ? item.CheckOutTime.ToString("HH:mm tt") : "-")</td>
+                        <td class="text-nowrap">
                             @if (item.CheckOutTime != null)
                             {
                                 var hours = (item.CheckOutTime - item.CheckInTime).TotalHours;
-                                @Math.Round(hours, 2)
+                                @Math.Round(hours, 2) @:hrs
                             }
                             else
                             {
