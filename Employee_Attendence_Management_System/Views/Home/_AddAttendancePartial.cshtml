@@ -7,23 +7,23 @@
     </div>
     <div class="modal-body">
         <div class="mb-4">
-            <h6 class="fw-bold text-secondary">Add New Attendance</h6>
             <form id="AddAttendanceForm">
                 <input type="hidden" asp-for="NewAttendance.AttendanceId" value="0" />
                 <input type="hidden" asp-for="NewAttendance.EmployeeId" />
-                <div class="mb-3">
+                <div class="form-floating mb-3">
                     <input asp-for="NewAttendance.Date" class="form-control" type="date" id="AddDate" />
                     <span asp-validation-for="NewAttendance.Date" class="text-danger text-size"></span>
+                    <label asp-for="NewAttendance.Date" class="form-label">Date</label>
                 </div>
-                <div class="mb-3">
-                    <label asp-for="NewAttendance.CheckInTime" class="form-label">Check-In Time</label>
+                <div class="form-floating mb-3">
                     <input asp-for="NewAttendance.CheckInTime" class="form-control" type="time" id="AddCheckIn" />
                     <span asp-validation-for="NewAttendance.CheckInTime" class="text-danger text-size"></span>
+                    <label asp-for="NewAttendance.CheckInTime" class="form-label">Check-In Time</label>
                 </div>
-                <div class="mb-3">
-                    <label asp-for="NewAttendance.CheckOutTime" class="form-label">Check-Out Time</label>
+                <div class="form-floating mb-3">
                     <input asp-for="NewAttendance.CheckOutTime" class="form-control" type="time" id="AddCheckOut" />
                     <span asp-validation-for="NewAttendance.CheckOutTime" class="text-danger text-size"></span>
+                    <label asp-for="NewAttendance.CheckOutTime" class="form-label">Check-Out Time</label>
                 </div>
                 <div class="modal-footer">
                     <button type="submit" class="btn solid-btn">Save</button>
@@ -54,10 +54,10 @@
                                     <td>@record.CheckInTime.ToString("hh\\:mm tt")</td>
                                     <td>@record.CheckOutTime.ToString("hh\\:mm tt")</td>
                                     <td>
-                                        <i class="fa-solid fa-pen edit-attendance" data-id="@record.EmployeeId"
+                                        <i class="fa-solid fa-pen edit-attendance text-black-50" data-id="@record.EmployeeId"
                                             data-attenid="@record.AttendanceId" data-bs-toggle="modal"
                                             data-bs-target="#EditAttendanceModal" title="Edit"></i>
-                                        <i class="fa-solid fa-trash delete-attendance" data-id="@record.EmployeeId"
+                                        <i class="fa-solid fa-trash delete-attendance text-black-50 ms-4" data-id="@record.EmployeeId"
                                             data-attenid="@record.AttendanceId" title="Delete"></i>
                                     </td>
                                 </tr>

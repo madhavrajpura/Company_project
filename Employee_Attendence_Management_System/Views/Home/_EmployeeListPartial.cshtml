@@ -44,7 +44,7 @@ else
                    onclick="GetIdForDeleteEmployee(this)"
                    style="cursor: pointer;"
                    title="Delete Employee"></i>
-                @if (hasAttendanceToday)
+                @* @if (hasAttendanceToday)
                 {
                     <span class="badge bg-danger fw-lighter delete-attendance"
                           data-id="@item.EmployeeId"
@@ -54,7 +54,7 @@ else
                           title="Delete Attendance"
                           style="font-weight: 100; letter-spacing: 1px; cursor: pointer; margin-left: 40px;"
                           onclick="GetIdForDeleteAttendance(this)">Delete</span>
-                }
+                } *@
             </td>
         </tr>
     }

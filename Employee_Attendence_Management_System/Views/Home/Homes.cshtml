@@ -10,24 +10,33 @@
         <h3 class="custom-text-color">Employee List</h3>
         <div class="search-div d-flex align-items-center justify-content-end gap-2">
             <div class="search-button">
-                <input type="text" id="searchbtn" placeholder="Search by Name, Email, Department, Position" class="p-2 border rounded text-truncate">
+                <input type="text" id="searchbtn" placeholder="Search by Name, Email, Department, Position"
+                    class="p-2 border rounded text-truncate">
             </div>
             <div class="add-Employee-button">
-                <button class="btn SaveEmployeeId solid-btn text-light p-2 text-size text-nowrap" data-bs-toggle="modal" title="Add Employee" data-bs-target="#SaveEmployeeModal" data-id="0">+ Add Employee</button>
+                <button class="btn SaveEmployeeId solid-btn text-light p-2 text-size text-nowrap" data-bs-toggle="modal"
+                    title="Add Employee" data-bs-target="#SaveEmployeeModal" data-id="0">+ Add Employee</button>
             </div>
         </div>
     </div>
     <!-- End Upper Div -->
     <!-- Start Employee List -->
     <div class="container-fluid p-0 pe-md-4 pe-3">
-        <div class="table-main-div table-responsive p-3 bg-white ms-md-4 ms-3 me-0 shadow-lg" style="border-top-right-radius: 10px; border-top-left-radius: 10px;">
+        <div class="table-main-div table-responsive p-3 bg-white ms-md-4 ms-3 me-0 shadow-lg"
+            style="border-top-right-radius: 10px; border-top-left-radius: 10px;">
             <table id="table" class="table">
                 <thead>
                     <tr class="border border-top-0 border-end-0 border-start-0 border-dark">
-                        <th scope="col" class="fw-bold text-start text-nowrap"># Employee ID <i class="bi bi-arrow-down-up ps-1" id="sortable-id" data-column="ID" data-direction="asc" style="cursor: pointer;"></i></th>
-                        <th scope="col" class="fw-bold text-start text-nowrap">Name <i class="bi bi-arrow-down-up ps-1" id="sortable-name" data-column="Name" data-direction="asc" style="cursor: pointer;"></i></th>
+                        <th scope="col" class="fw-bold text-start text-nowrap"># Employee ID <i
+                                class="bi bi-arrow-down-up ps-1" id="sortable-id" data-column="ID" data-direction="asc"
+                                style="cursor: pointer;"></i></th>
+                        <th scope="col" class="fw-bold text-start text-nowrap">Name <i class="bi bi-arrow-down-up ps-1"
+                                id="sortable-name" data-column="Name" data-direction="asc" style="cursor: pointer;"></i>
+                        </th>
                         <th scope="col" class="fw-bold text-start text-nowrap">Email</th>
-                        <th scope="col" class="fw-bold text-start text-nowrap">Department <i class="bi bi-arrow-down-up ps-1" id="sortable-department" data-column="Department" data-direction="asc" style="cursor: pointer;"></i></th>
+                        <th scope="col" class="fw-bold text-start text-nowrap">Department <i
+                                class="bi bi-arrow-down-up ps-1" id="sortable-department" data-column="Department"
+                                data-direction="asc" style="cursor: pointer;"></i></th>
                         <th scope="col" class="fw-bold text-start text-nowrap">Position</th>
                         <th scope="col" class="fw-bold text-start text-nowrap">Actions</th>
                     </tr>
@@ -35,7 +44,8 @@
                 <tbody id="EmployeeTableBody"></tbody>
             </table>
         </div>
-        <div class="pagination-main-div shadow d-flex justify-content-end gap-2 p-3 pt-0 bg-white ps-3 ms-md-4 ms-3 pe-3" style="border-bottom-right-radius: 10px; border-bottom-left-radius: 10px;">
+        <div class="pagination-main-div shadow d-flex justify-content-end gap-2 p-3 pt-0 bg-white ps-3 ms-md-4 ms-3 pe-3"
+            style="border-bottom-right-radius: 10px; border-bottom-left-radius: 10px;">
             <span class="pt-2">Items Per page:</span>
             <select id="itemselect">
                 <option value="3">3</option>
@@ -43,8 +53,9 @@
                 <option value="10">10</option>
             </select>
             <span class="pt-2 ps-1" id="pagination-info"></span>
-            <button id="left-arrow" class="btn border border-dark bg-light ps-2"><</button>
-            <button id="right-arrow" class="btn border border-dark bg-light ps-2">></button>
+            <button id="left-arrow" class="btn border border-dark bg-light ps-2"><
+                </button>
+                    <button id="right-arrow" class="btn border border-dark bg-light ps-2">></button>
         </div>
     </div>
     <!-- End Employee List -->
@@ -67,7 +78,8 @@
                 <div class="d-flex justify-content-center">
                     <i class="fa-solid fa-triangle-exclamation fa-3x text-warning"></i>
                 </div>
-                <p class="fw-semibold text-secondary text-center mb-3 pt-2">Are you sure you want to delete this Employee?</p>
+                <p class="fw-semibold text-secondary text-center mb-3 pt-2">Are you sure you want to delete this
+                    Employee?</p>
                 <form id="DeleteEmployeeFrom">
                     <input type="hidden" asp-for="@Model.EmployeeId" id="DeleteEmployeeId" name="employeeid">
                     <div class="modal-footer mt-3 d-flex justify-content-center">
@@ -93,19 +105,21 @@
         <div class="modal-content">
             <div class="modal-header">
                 <h5 class="modal-title fs-5 fw-bold text-secondary">Delete Attendance Confirmation</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                <button type="button" class="btn-close  deleteCancel" data-bs-dismiss="modal"
+                    aria-label="Close"></button>
             </div>
             <div class="modal-body">
                 <div class="d-flex justify-content-center">
                     <i class="fa-solid fa-triangle-exclamation fa-3x text-warning"></i>
                 </div>
-                <p class="fw-semibold text-secondary text-center mb-3 pt-2">Are you sure you want to delete this attendance record?</p>
+                <p class="fw-semibold text-secondary text-center mb-3 pt-2">Are you sure you want to delete this
+                    attendance record?</p>
                 <form id="DeleteAttendanceForm">
                     <input type="hidden" asp-for="@Model.EmployeeId" id="DeleteAttendanceEmployeeId" name="employeeId">
                     <input type="hidden" asp-for="@Model.AttendanceId" id="DeleteAttendanceId" name="attendanceId">
                     <div class="modal-footer mt-3 d-flex justify-content-center">
                         <button type="submit" class="btn solid-btn" data-bs-dismiss="modal">Yes</button>
-                        <button type="button" class="btn hollow-btn" data-bs-dismiss="modal">No</button>
+                        <button type="button" class="btn hollow-btn deleteCancel" data-bs-dismiss="modal">No</button>
                     </div>
                 </form>
             </div>
@@ -196,6 +210,7 @@
                 data: { employeeId: employeeId, attendanceId: attendanceId },
                 success: function (data) {
                     $("#EditAttendanceModal_Content").html(data);
+                    $("#SaveAttendanceModal").modal("hide");
                 },
                 error: function () {
                     callErrorToaster("Error loading attendance data");
@@ -208,6 +223,7 @@
             var attendanceId = $(this).data('attenid');
             $("#DeleteAttendanceEmployeeId").val(employeeId);
             $("#DeleteAttendanceId").val(attendanceId);
+            $("#SaveAttendanceModal").modal("hide");
             $("#DeleteAttendanceModal").modal("show");
         });
         // Delete Attendance POST
@@ -235,7 +251,7 @@
                 }
             });
         });
-        
+
         $(document).ready(function () {
 
             // Initial table load
@@ -263,7 +279,7 @@
                     Pagination(currentPage, searchText, pageSize, sortColumn, sortDirection);
                 }
             });
-            
+
             // Item per Page
             $("#itemselect").on("change", function () {
                 pageSize = $(this).val();
@@ -317,6 +333,10 @@
                         callErrorToaster("Error Loading data");
                     }
                 });
+            });
+
+            $(".deleteCancel").on("click", function () {
+                $("#SaveAttendanceModal").modal("show");
             });
         });
     </script>
