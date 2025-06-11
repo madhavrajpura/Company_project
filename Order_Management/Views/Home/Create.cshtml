@@ -1,12 +1,19 @@
 @model DataAccessLayer.ViewModels.OrderViewModel
 
-<h2>Create Order</h2>
-<form asp-action="Create" method="post" class="mt-4">
+<div class="d-flex justify-content-between">
+    <h2>Create Order</h2>
+    <a class="btn btn-secondary" asp-action="Index" asp-controller="Home">Back to Orders</a>
+</div>
+
+
+<form asp-action="Create" method="post" class="mt-4" id="orderForm">
+    @Html.AntiForgeryToken()
 
     <div id="order-items">
-        <div class="order-item form-group row mb-2">
+        <div class="order-item form-group row mb-2" data-item-index="0">
             <div class="col-md-4 mt-4">
-                <select name="OrderItems[0].ProductId" class="form-control" onchange="updateProductDetails(this, 0)">
+                <select name="OrderItems[0].ProductId" class="form-control product-select"
+                    onchange="updateProduct(this, 0)" required>
                     <option value="">-- Select Product --</option>
                     @foreach (var ProductVM in Model.AvailableProducts)
                     {
@@ -16,94 +23,176 @@
                         </option>
                     }
                 </select>
+                <span class="text-danger field-validation-error" data-valmsg-for="OrderItems[0].ProductId"></span>
             </div>
             <div class="col-md-2 d-flex mt-4">
-                <button type="button" class="btn btn-outline-secondary" id="minusBtn"
-                    onclick="decrementQty(this)">-</button>
-                <input type="number" name="OrderItems[0].Quantity" class="form-control text-center mx-1" value="1"
-                    min="1" onchange="calculateTotal()" />
-                <button type="button" class="btn btn-outline-secondary" id="plusBtn"
-                    onclick="incrementQty(this)">+</button>
+                <button type="button" class="btn btn-outline-secondary minus-btn"
+                    onclick="changeQuantity(this, -1)">-</button>
+                <input type="number" name="OrderItems[0].Quantity" class="form-control text-center mx-1 quantity-input"
+                    value="1" min="1" required />
+                <button type="button" class="btn btn-outline-secondary plus-btn"
+                    onclick="changeQuantity(this, 1)">+</button>
             </div>
             <div class="col-md-2 mt-4">
-                <input type="text" name="OrderItems[0].Price" class="form-control" readonly />
+                <input type="text" name="OrderItems[0].Price" class="form-control price-input" readonly />
                 <input type="hidden" name="OrderItems[0].ProductName" class="product-name-hidden" />
+            </div>
+            <div class="col-md-2 mt-4">
+                <button type="button" class="btn btn-danger remove-item" onclick="removeItem(this)"
+                    style="display:none">Remove</button>
             </div>
         </div>
     </div>
-    <button type="button" onclick="addNewItem()" class="btn btn-secondary mt-4">Add Product</button>
+
+    <button type="button" onclick="addNewItem()" class="btn btn-secondary mt-4" id="addProductBtn">
+        Add Product
+    </button>
     <hr />
     <div class="mt-4">
-        <strong class="fs-5">Total Amount : </strong> <span id="total" class="fs-5">0</span>
+        <strong class="fs-5">Total Amount: </strong>
+        <span id="total" class="fs-5">0</span>
     </div>
-    <button type="submit" class="btn btn-primary mt-4">Save</button>
+    <button type="submit" class="btn btn-primary mt-4" id="saveBtn">
+        Save
+    </button>
 </form>
 
 @section Scripts {
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-validate/1.19.5/jquery.validate.min.js"></script>
+    <script
+        src="https://cdnjs.cloudflare.com/ajax/libs/jquery-validate-unobtrusive/3.2.12/jquery.validate.unobtrusive.min.js"></script>
 
     <script>
-
-        let index = 1;
-        const modelProducts = @Html.Raw(Json.Serialize(Model.AvailableProducts));
+        let itemCount = 1;
 
         $(document).ready(function () {
-            updateProductDetails(document.querySelector('select[name="OrderItems[0].ProductId"]'), 0);
-            document.addEventListener('click', function (e) {
-                if (e.target && e.target.classList.contains('plusBtn')) {
-                    incrementQty(e.target);
-                } else if (e.target && e.target.classList.contains('minusBtn')) {
-                    decrementQty(e.target);
+            // Initialize total
+            updateTotal();
+            // Setup form validation
+            $('#orderForm').validate({
+                errorElement: 'span',
+                errorClass: 'text-danger',
+                submitHandler: function (form) {
+                    if (isFormValid()) {
+                        form.submit();
+                    } else {
+                        callErrorToaster('Please select a product and valid quantity for all items.');
+                    }
                 }
             });
         });
 
         function addNewItem() {
-            const item = document.querySelector('.order-item');
-            const clone = item.cloneNode(true);
-            clone.querySelectorAll('select, input').forEach(el => {
-                const name = el.getAttribute('name');
-                if (name) el.setAttribute('name', name.replace(/\d+/, index));
-                if (el.tagName === 'INPUT') el.value = el.name.includes('Quantity') ? 1 : '';
+            // Check if existing items are valid
+            if (!isFormValid()) {
+                callErrorToaster('Please select a product for all items before adding another.');
+                return;
+            }
+
+            // Clone the first item
+            const item = $('.order-item:first').clone();
+            item.attr('data-item-index', itemCount);
+
+            // Update names and clear values
+            item.find('select, input').each(function () {
+                const name = $(this).attr('name');
+                if (name) {
+                    $(this).attr('name', name.replace(/\d+/, itemCount));
+                }
+                if ($(this).is('input')) {
+                    if ($(this).hasClass('quantity-input')) {
+                        $(this).val(1);
+                    } else if (!$(this).hasClass('product-name-hidden')) {
+                        $(this).val('');
+                    }
+                }
+                if ($(this).is('select')) {
+                    $(this).val('');
+                }
             });
-            // Re-assign event to new clone
-            document.getElementById('order-items').appendChild(clone);
-            index++;
+
+            // Show remove button and add to form
+            item.find('.remove-item').show();
+            $('#order-items').append(item);
+            itemCount++;
+            updateSaveButton();
         }
 
-        function updateProductDetails(select, i) {
+        function removeItem(button) {
+            if ($('.order-item').length > 1) {
+                $(button).closest('.order-item').remove();
+                updateTotal();
+                updateSaveButton();
+            }
+        }
+
+        function updateProduct(select, index) {
             const selected = select.options[select.selectedIndex];
-            const price = selected.dataset.price;
-            const name = selected.dataset.name;
-            const row = select.closest('.order-item');
-            row.querySelector('input[name*="Price"]').value = price;
-            row.querySelector('input[name*="ProductName"]').value = name;
-            calculateTotal();
+            const price = selected.dataset.price || '';
+            const name = selected.dataset.name || '';
+            const row = $(select).closest('.order-item');
+
+            // Update price and name
+            row.find('.price-input').val(price);
+            row.find('.product-name-hidden').val(name);
+
+            // Check for duplicate product
+            if (selected.value && isDuplicateProduct(selected.value, row)) {
+                callErrorToaster('This product is already selected.');
+                $(select).val('');
+                row.find('.price-input').val('');
+                row.find('.product-name-hidden').val('');
+            }
+
+            updateTotal();
+            updateSaveButton();
         }
 
-        function incrementQty(btn) {
-            const input = btn.parentElement.querySelector('input[name*="Quantity"]');
-            input.value = parseInt(input.value) + 1;
-            calculateTotal();
-        }
-
-        function decrementQty(btn) {
-            const input = btn.parentElement.querySelector('input[name*="Quantity"]');
-            input.value = Math.max(1, parseInt(input.value) - 1);
-            calculateTotal();
-        }
-
-        function calculateTotal() {
-            let total = 0;
-            document.querySelectorAll('#order-items .order-item').forEach(row => {
-                const price = parseFloat(row.querySelector('input[name*="Price"]').value) || 0;
-                const qty = parseInt(row.querySelector('input[name*="Quantity"]').value) || 0;
-                total += price * qty;
+        function isDuplicateProduct(productId, currentRow) {
+            let isDuplicate = false;
+            $('.product-select').not(currentRow.find('.product-select')).each(function () {
+                if ($(this).val() === productId && productId !== '') {
+                    isDuplicate = true;
+                    return false;
+                }
             });
-
-            document.getElementById('total').textContent = total.toFixed(2);
+            return isDuplicate;
         }
 
-        document.addEventListener('input', calculateTotal);
+        function changeQuantity(button, change) {
+            const input = $(button).parent().find('.quantity-input');
+            const newValue = Math.max(1, parseInt(input.val()) + change);
+            input.val(newValue);
+            updateTotal();
+            updateSaveButton();
+        }
 
+        function updateTotal() {
+            let total = 0;
+            $('.order-item').each(function () {
+                const price = parseFloat($(this).find('.price-input').val()) || 0;
+                const quantity = parseInt($(this).find('.quantity-input').val()) || 0;
+                total += price * quantity;
+            });
+            $('#total').text(total.toFixed(2));
+        }
+
+        function isFormValid() {
+            let isValid = true;
+            $('.order-item').each(function () {
+                const select = $(this).find('.product-select').val();
+                const quantity = $(this).find('.quantity-input').val();
+                if (!select || parseInt(quantity) < 1) {
+                    isValid = false;
+                    return false;
+                }
+            });
+            return isValid;
+        }
+
+        function updateSaveButton() {
+            $('#saveBtn').prop('disabled', !isFormValid() && $('.order-item').length > 1);
+        }
     </script>
 }

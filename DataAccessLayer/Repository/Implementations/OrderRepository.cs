@@ -10,10 +10,7 @@ public class OrderRepository : IOrderRepository
 
     public OrderRepository(ApplicationDBContext context) => _context = context;
 
-    public async Task<List<Product>> GetAllProductsAsync() {
-        var result = await _context.Products.ToListAsync();
-        return result;
-    }
+    public async Task<List<Product>> GetAllProductsAsync() => await _context.Products.ToListAsync();
 
     public async Task<bool> CreateOrderAsync(Order order)
     {
@@ -21,17 +18,13 @@ public class OrderRepository : IOrderRepository
         return await _context.SaveChangesAsync() > 0;
     }
 
-    public async Task<List<Order>> GetAllOrdersAsync()
-    {
-        var result = await _context.Orders.Include(o => o.OrderItems).ToListAsync();
-        return result;
-    }
+    public async Task<List<Order>> GetAllOrdersAsync() => await _context.Orders.Include(o => o.OrderItems).ToListAsync();
 
-    public async Task<Order?> GetOrderDetailsAsync(int orderId){
-        var order = await _context.Orders
+    public async Task<Order?> GetOrderDetailsAsync(int orderId)
+    {
+        return await _context.Orders
             .Include(o => o.OrderItems)
             .FirstOrDefaultAsync(o => o.Id == orderId);
-        return order;
     }
 
     public async Task<bool> UpdateOrderStatusAsync(int orderId, string status)

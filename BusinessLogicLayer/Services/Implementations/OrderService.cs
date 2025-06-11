@@ -22,6 +22,7 @@ public class OrderService : IOrderService
             ProductName = p.Name,
             Price = p.Price
         }).ToList();
+
         return productViewModels;
     }
 
@@ -40,9 +41,7 @@ public class OrderService : IOrderService
             OrderTotal = model.OrderItems.Sum(x => x.Price * x.Quantity)
         };
 
-        var result = await _orderRepo.CreateOrderAsync(order);
-
-        return result;
+        return await _orderRepo.CreateOrderAsync(order);
     }
 
 
@@ -65,6 +64,7 @@ public class OrderService : IOrderService
     public async Task<OrderViewModel?> GetOrderDetailAsync(int id)
     {
         var order = await _orderRepo.GetOrderDetailsAsync(id);
+        
         if (order == null) return null;
 
         var data = new OrderViewModel

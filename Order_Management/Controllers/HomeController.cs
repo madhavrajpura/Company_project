@@ -2,6 +2,7 @@
 using BusinessLogicLayer.Services.Interfaces;
 using DataAccessLayer.ViewModels;
 using BusinessLogicLayer.Helper;
+using System.ComponentModel.DataAnnotations;
 
 public class HomeController : Controller
 {
@@ -23,8 +24,8 @@ public class HomeController : Controller
         return View(model);
     }
 
-
     [HttpPost]
+    [ValidateAntiForgeryToken]
     public async Task<IActionResult> Create(OrderViewModel model)
     {
         var success = await _orderService.CreateOrderAsync(model);
@@ -33,13 +34,11 @@ public class HomeController : Controller
             TempData["SuccessMessage"] = "Order created successfully!";
             return RedirectToAction("Index");
         }
-        TempData["ErrorMessage"] = "Failed to create order.";
 
+        TempData["ErrorMessage"] = "Failed to create order.";
         ViewBag.Products = await _orderService.GetProductsAsync();
         return View(model);
     }
-
-
 
     public async Task<IActionResult> Details(int id)
     {
