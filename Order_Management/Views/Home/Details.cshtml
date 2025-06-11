@@ -1,0 +1,52 @@
+@model DataAccessLayer.ViewModels.OrderViewModel
+<h2>Order Details</h2>
+
+<div class="mb-4 mt-3 fs-5">
+    <strong class="fw-bold ms-1">Order ID : </strong> @Model.OrderId
+</div>
+
+<table class="table fs-5">
+    <thead>
+        <tr>
+            <th>Product Name</th>
+            <th>Quantity</th>
+            <th>Product Price</th>
+            <th>Sub Total</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var item in Model.OrderItems)
+        {
+            <tr>
+                <td>@item.ProductName</td>
+                <td>@item.Quantity</td>
+                <td>₹ @item.Price</td>
+                <td>₹ @(item.Quantity* item.Price)</td>
+            </tr>
+        }
+    </tbody>
+</table>
+
+<div class="d-flex justify-content-between align-items-center fs-5">
+    <div class="mb-3 mt-3 d-flex gap-3">
+        <strong class="fw-bold ">Order Status : </strong>
+        @if (Model.OrderStatus == "In Process")
+        {
+            <span class="badge bg-primary">@Model.OrderStatus</span>
+        }
+        else
+        {
+            <span class="badge bg-success">@Model.OrderStatus</span>
+        }
+    </div>
+
+    <div class="d-flex gap-3">
+        <strong class="fw-bold">Total Amount : </strong>
+        <span>₹ @Model.OrderTotal</span>
+    </div>
+</div>
+
+
+<div>
+    <a asp-action="Index" class="btn btn-secondary mt-5">Back to Orders</a>
+</div>

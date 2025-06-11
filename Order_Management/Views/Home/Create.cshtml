@@ -1,0 +1,109 @@
+@model DataAccessLayer.ViewModels.OrderViewModel
+
+<h2>Create Order</h2>
+<form asp-action="Create" method="post" class="mt-4">
+
+    <div id="order-items">
+        <div class="order-item form-group row mb-2">
+            <div class="col-md-4 mt-4">
+                <select name="OrderItems[0].ProductId" class="form-control" onchange="updateProductDetails(this, 0)">
+                    <option value="">-- Select Product --</option>
+                    @foreach (var ProductVM in Model.AvailableProducts)
+                    {
+                        <option value="@ProductVM.ProductId" data-name="@ProductVM.ProductName"
+                            data-price="@ProductVM.Price">
+                            @ProductVM.ProductName
+                        </option>
+                    }
+                </select>
+            </div>
+            <div class="col-md-2 d-flex mt-4">
+                <button type="button" class="btn btn-outline-secondary" id="minusBtn"
+                    onclick="decrementQty(this)">-</button>
+                <input type="number" name="OrderItems[0].Quantity" class="form-control text-center mx-1" value="1"
+                    min="1" onchange="calculateTotal()" />
+                <button type="button" class="btn btn-outline-secondary" id="plusBtn"
+                    onclick="incrementQty(this)">+</button>
+            </div>
+            <div class="col-md-2 mt-4">
+                <input type="text" name="OrderItems[0].Price" class="form-control" readonly />
+                <input type="hidden" name="OrderItems[0].ProductName" class="product-name-hidden" />
+            </div>
+        </div>
+    </div>
+    <button type="button" onclick="addNewItem()" class="btn btn-secondary mt-4">Add Product</button>
+    <hr />
+    <div class="mt-4">
+        <strong class="fs-5">Total Amount : </strong> <span id="total" class="fs-5">0</span>
+    </div>
+    <button type="submit" class="btn btn-primary mt-4">Save</button>
+</form>
+
+@section Scripts {
+
+    <script>
+
+        let index = 1;
+        const modelProducts = @Html.Raw(Json.Serialize(Model.AvailableProducts));
+
+        $(document).ready(function () {
+            updateProductDetails(document.querySelector('select[name="OrderItems[0].ProductId"]'), 0);
+            document.addEventListener('click', function (e) {
+                if (e.target && e.target.classList.contains('plusBtn')) {
+                    incrementQty(e.target);
+                } else if (e.target && e.target.classList.contains('minusBtn')) {
+                    decrementQty(e.target);
+                }
+            });
+        });
+
+        function addNewItem() {
+            const item = document.querySelector('.order-item');
+            const clone = item.cloneNode(true);
+            clone.querySelectorAll('select, input').forEach(el => {
+                const name = el.getAttribute('name');
+                if (name) el.setAttribute('name', name.replace(/\d+/, index));
+                if (el.tagName === 'INPUT') el.value = el.name.includes('Quantity') ? 1 : '';
+            });
+            // Re-assign event to new clone
+            document.getElementById('order-items').appendChild(clone);
+            index++;
+        }
+
+        function updateProductDetails(select, i) {
+            const selected = select.options[select.selectedIndex];
+            const price = selected.dataset.price;
+            const name = selected.dataset.name;
+            const row = select.closest('.order-item');
+            row.querySelector('input[name*="Price"]').value = price;
+            row.querySelector('input[name*="ProductName"]').value = name;
+            calculateTotal();
+        }
+
+        function incrementQty(btn) {
+            const input = btn.parentElement.querySelector('input[name*="Quantity"]');
+            input.value = parseInt(input.value) + 1;
+            calculateTotal();
+        }
+
+        function decrementQty(btn) {
+            const input = btn.parentElement.querySelector('input[name*="Quantity"]');
+            input.value = Math.max(1, parseInt(input.value) - 1);
+            calculateTotal();
+        }
+
+        function calculateTotal() {
+            let total = 0;
+            document.querySelectorAll('#order-items .order-item').forEach(row => {
+                const price = parseFloat(row.querySelector('input[name*="Price"]').value) || 0;
+                const qty = parseInt(row.querySelector('input[name*="Quantity"]').value) || 0;
+                total += price * qty;
+            });
+
+            document.getElementById('total').textContent = total.toFixed(2);
+        }
+
+        document.addEventListener('input', calculateTotal);
+
+    </script>
+}

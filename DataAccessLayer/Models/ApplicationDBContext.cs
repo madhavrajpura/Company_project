@@ -8,16 +8,13 @@ public class ApplicationDBContext : DbContext
     {
     }
 
-    public DbSet<Employee> Employees { get; set; } = null!;
-    public DbSet<Attendence> Attendences { get; set; } = null!;
+    public DbSet<Order> Orders { get; set; } = null!;
+    public DbSet<OrderItem> OrderItems { get; set; } = null!;
+    public DbSet<Product> Products { get; set; } = null!;
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
-        modelBuilder.Entity<Attendence>().Property(a => a.Date).HasColumnType("timestamp without time zone").HasDefaultValueSql("CURRENT_TIMESTAMP");
-        modelBuilder.Entity<Attendence>().Property(a => a.CheckInTime).HasColumnType("timestamp without time zone").HasDefaultValueSql("CURRENT_TIMESTAMP");
-        modelBuilder.Entity<Attendence>().Property(a => a.CheckOutTime).HasColumnType("timestamp without time zone").HasDefaultValueSql("CURRENT_TIMESTAMP");
-        modelBuilder.Entity<Employee>().Property(e => e.IsDeleted).HasDefaultValue(false);
-        modelBuilder.Entity<Attendence>().Property(a => a.IsDeleted).HasDefaultValue(false);
-        modelBuilder.Entity<Employee>().HasIndex(e => e.Email).IsUnique();
+        modelBuilder.Entity<Order>().Property(o => o.OrderStatus).HasDefaultValue("In Process");
     }
+
 }
