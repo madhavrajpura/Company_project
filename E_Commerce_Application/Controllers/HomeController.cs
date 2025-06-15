@@ -36,7 +36,7 @@ public class HomeController : Controller
     {
         MainViewModel MenuVM = new();
         MenuVM.categoryListVM = await _categoryService.GetAll();
-        return PartialView("_CategoryPartial", MenuVM);
+        return PartialView("_CategoryListPartial", MenuVM);
     }
 
     public async Task<IActionResult> PaginatedData(int categoryid, string search = "", int pageNumber = 1, int pageSize = 5)
@@ -125,6 +125,7 @@ public class HomeController : Controller
         return PartialView("_SaveProductPartial", MainVM);
     }
 
+[HttpPost]
     public async Task<IActionResult> SaveProduct(MainViewModel MainMV)
     {
         bool isProductExists = await _productService.IsProductExists(MainMV.productVM);

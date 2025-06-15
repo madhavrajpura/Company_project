@@ -1,3 +1,295 @@
-﻿@{
+﻿@model DataAccessLayer.ViewModels.MainViewModel
+
+@{
     ViewData["Title"] = "Home Page";
+}
+
+<div class="tabs bg-light d-flex justify-content-between">
+
+    <div class="container-fluid ps-3 pe-3">
+
+        <!-- List of Item and Modifier -->
+        <div class="bg-white shadow-sm pt-2">
+            <ul class="nav nav-tabs" id="myTab" role="tablist">
+                <li class="nav-item" role="presentation"></li>
+                <button class="nav-link fw-semibold text-dark" id="profile-tab" data-bs-toggle="tab"
+                    data-bs-target="#profile-tab-pane" type="button" role="tab" aria-controls="profile-tab-pane"
+                    aria-selected="false"><i class="bi bi-ui-checks-grid  pe-2 pb-1"></i>Products</button>
+                </li>
+            </ul>
+        </div>
+
+        <!-- Both the Tabs -->
+        <div class="Both-tab tab-content bg-white shadow-lg" id="myTabContent">
+
+            <!-- MODIFIER  -->
+            <div class="tab-pane fade " id="profile-tab-pane" role="tabpanel" aria-labelledby="profile-tab"
+                tabindex="1">
+
+                <div class="row d-flex m-1 ms-0 me-0">
+
+                    @* Left-SideBar-Modifier *@
+                    <div class="left-sidebar-modifier-main-div bg-opacity-10 col-xl-2 col-lg-3 col-md-4 col-sm-12 ps-0 pe-0 pb-3 border border-primary border-bottom-0 border-end-1
+            border-start-0 border-top-0" style="background-color: rgb(249, 249, 249);">
+
+                        <div class="user-text p-3 d-flex justify-content-between">
+                            <span class="fw-bold fs-5">Category</span>
+                            <i class="fa-regular fa-square-plus fs-4 user-text" data-bs-toggle="modal"
+                                data-bs-target="#SaveCategoryModal"></i>
+                        </div>
+
+                        <!-- Modifiers -->
+
+                        @* for loop *@
+
+                        <div id="CategoryList_Partial" style="overflow-y:scroll; height:260px;">
+
+                        </div>
+                    </div>
+
+                    @* Right-SideBar-Modifier *@
+                    <div class=" right-side-table-div bg-white pt-3 com-sm-12 col-md-8 col-lg-9 col-xl-10 col-12">
+
+                        <div class="menu-text fs-3 fw-bold user-text">Products</div>
+                        <div class="search-adduser-div d-flex justify-content-end pb-2 align-items-center gap-2">
+                            <div class="search-button pt-2">
+
+                                <input type="hidden" id="CategoryId" value="@Model.categoryListVM[0].CategoryId">
+                                <input type="text" id="searchbtn-modifier" placeholder="Search" class=" p-sm-1 border ">
+                                <i class="fa-solid fa-magnifying-glass search-icon-item "></i>
+
+                            </div>
+
+                            <div class="add-user-button pt-2 pe-sm-2 pe-0">
+                                <button type="button" class="addModifierBtn btn solid-btn text-light p-1"
+                                    data-bs-toggle="modal" data-bs-target="#SaveProductmodal" id="addModifierModalId">
+                                    +<span class="d-none d-md-inline">New Product</span>
+                                </button>
+                            </div>
+
+                        </div>
+
+                        <div class="table-responsive">
+                            <table class="table mb-0" id="demo">
+                                <thead>
+                                    <tr class="border border-top-0 border-end-0 border-start-0 border-dark">
+                                        <th scope="col" class="text-start fw-bold">Name</th>
+                                        <th scope="col" class="text-center fw-bold">Price</th>
+                                        <th scope="col" class="text-center fw-bold">Active</th>
+                                        <th scope="col" class="text-center fw-bold">Action</th>
+                                    </tr>
+                                </thead>
+                                <tbody style="white-space: nowrap;" id="modifier-list-body">
+
+                                </tbody>
+                            </table>
+                        </div>
+
+                        @* Pagination Modifier div *@
+                        <div
+                            class="pagination-main-div-modifier d-flex justify-content-end gap-2 p-3 pt-3 bg-white ps-3 pe-2">
+
+                            <span class="pt-2">Items Per page:</span>
+
+                            <select id="itemselect">
+                                <option value="3">3</option>
+                                <option value="5">5</option>
+                                <option value="10">10</option>
+                            </select>
+
+                            <span class=" pt-2 ps-1" id="pagination-info"></span>
+                            <button id="left-arrow" class="btn border border-dark bg-light ps-2">&lt;</button>
+                            <button id="right-arrow" class="btn border border-dark bg-light ps-2">&gt;</button>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+
+    </div>
+</div>
+
+@*----------------------------------------------------------------------*@
+@*--------------------------All Modals Are Here-------------------------*@
+@*----------------------------------------------------------------------*@
+
+<!------------------------------------ Category ---------------------------------------->
+
+
+<!-- Save categorty modal  -->
+<div class="modal fade" id="SaveCategoryModal" tabindex="-1" data-bs-backdrop="static" data-bs-keyboard="false"
+    aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered" id="SaveCategory_Content">
+
+    </div>
+</div>
+
+<!-- Delete Category -->
+<div id="DeleteCategoryModal" class="modal fade" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="fw-bold fs-5 text-secondary modal-title">Delete Confirmation</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body ">
+                <div class="d-flex justify-content-center mb-3">
+                    <i class=" fa-solid fa-triangle-exclamation text-danger fs-1"></i>
+                </div>
+                <p class="fw-semibold text-secondary text-center mb-3">Are you sure you want to delete this Category ?
+                </p>
+                <form id="DeleteCategoryForm">
+                    <input type="hidden" asp-for="@Model.categoryVM.CategoryId" id="deletecategoryid" name="categoryid">
+                    <div class="modal-footer d-flex justify-content-center">
+                        <button type="submit" class="btn solid-btn" data-bs-dismiss="modal">Yes</button>
+                        <button type="button" class="btn hollow-btn" data-bs-dismiss="modal">No</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Save Product modal  -->
+<div class="modal fade" id="SaveProductModal" tabindex="-1" data-bs-backdrop="static" data-bs-keyboard="false"
+    aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered" id="SaveProduct_Content">
+
+    </div>
+</div>
+
+
+<!-- Delete Product Modal-->
+<div id="DeleteProductModal" class="modal fade" tabindex="-1" data-bs-backdrop="static" data-bs-keyboard="false">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title fs-5 fw-bold text-secondary">Delete Confirmation</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body ">
+                <div class="d-flex justify-content-center mb-3"> <i
+                        class=" fa-solid fa-triangle-exclamation text-danger fs-1"></i>
+                </div>
+                <p class="fw-semibold text-secondary text-center mb-3">Are you sure you want to delete this Product ?
+                </p>
+                <form id="DeleteProductForm">
+                    <input type="hidden" asp-for="@Model.productVM.ProductId" id="deleteproductid" name="productid">
+                    <div class="modal-footer mt-3 d-flex justify-content-center">
+                        <button type="submit" class="btn solid-btn" data-bs-dismiss="modal">Yes</button>
+                        <button type="button" class="btn hollow-btn" data-bs-dismiss="modal">No</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+@section Scripts {
+    <script>
+
+        // All Data for Products
+        let currentPage = 1;
+        let searchText = "";
+        let pageSize = $("#itemselect").val();
+        let categoryid = $("#CategoryId").val();
+
+        PaginatedData(categoryid, searchText, currentPage, pageSize);
+
+        // Modifiers Pagination function
+        function PaginatedData(categoryid, search = "", page = 1, pageSize = 3) {
+            $.ajax({
+                url: "/Home/PaginatedData",
+                type: "GET",
+                data: { categoryid, search, pageNumber: page, pageSize },
+                success: function (data) {
+                    $("#modifier-list-body").html(data);
+
+                    currentPage = page;
+                    pageSize = parseInt(pageSize);
+                    var totalRecords = parseInt($("#totalRecordsHidden").val()) || 0;
+
+                    var startItem = totalRecords === 0 ? 0 : (currentPage - 1) * pageSize + 1;
+
+                    var endItem = Math.min(currentPage * pageSize, totalRecords);
+
+                    $("#pagination-info").text("Showing " + startItem + " - " + endItem + " of " + totalRecords);
+                    $("#left-arrow").prop("disabled", currentPage === 1);
+                    $("#right-arrow").prop("disabled", currentPage * pageSize >= totalRecords);
+                }
+            });
+        }
+
+        function GetIdForDeleteCategory(tag) {
+            let categoryIdInput = document.getElementById("deletecategoryid");
+            categoryIdInput.value = tag.getAttribute("data-id");
+        }
+
+        // To show the ModifierGroup List
+        function LoadCategoryList() {
+
+            var categoryid = document.getElementById("CategoryId").value;
+
+            $.ajax({
+                url: "/Home/GetAllCategories",
+                type: "GET",
+                success: function (data) {
+                    document.getElementById("CategoryList_Partial").innerHTML = data;
+                    PaginatedData(categoryid, searchText, currentPage, pageSize);
+                }
+            });
+        }
+
+        $(document).ready(function () {
+
+            PaginatedData(categoryid, searchText, currentPage, pageSize);
+
+            LoadCategoryList();
+
+
+            // Modifier search-button
+            $("#searchbtn").on("keyup", function () {
+                searchText = $(this).val().trim();
+                currentPage = 1;
+                PaginatedData(categoryid, searchText, currentPage, pageSize);
+            });
+
+            // ModifierGroup click
+            $(document).on("click", ".ModifierGet", function () {
+                $(".ModifierGet").removeClass("active-category");
+                $(this).addClass("active-category");
+                modgrpid = $(this).data("id");
+                currentPage = 1;
+                PaginatedData(categoryid, searchText, currentPage, pageSize);
+            });
+
+            // Modifier Pagination right arrow buttons
+            $("#right-arrow").on("click", function () {
+                let rightarrow = !$(this).prop("disabled");
+                if (rightarrow) {
+                    currentPage++;
+                    PaginatedData(categoryid, searchText, currentPage, pageSize);
+                }
+            });
+
+            // Modifier Pagination left arrow buttons
+            $("#left-arrow").on("click", function () {
+                let leftarrow = !$(this).prop("disabled");
+                if (leftarrow) {
+                    currentPage--;
+                    PaginatedData(categoryid, searchText, currentPage, pageSize);
+                }
+            });
+
+            // Modifier per page dropdown
+            $("#itemselect").on("change", function () {
+                pageSize = $(this).val();
+                currentPage = 1;
+                PaginatedData(categoryid, searchText, currentPage, pageSize);
+            });
+        });
+
+    </script>
 }

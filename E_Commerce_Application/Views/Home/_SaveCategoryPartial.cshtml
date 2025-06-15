@@ -1,0 +1,53 @@
+@model DataAccessLayer.ViewModels.MainViewModel;
+
+<div class="modal-content">
+    <div class="modal-header">
+        <h1 class="modal-title fs-5 fw-bold text-secondary" id="exampleModalLabel">@(Model.categoryVM.CategoryId == 0 ?
+                        "Add New" : "Edit") Category</h1>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+    </div>
+    <form asp-action="SaveCategoryForm">
+        <div class="modal-body">
+            <input type="hidden" asp-for="@Model.categoryVM.CategoryId" />
+            <div class="form-floating mb-3">
+                <input type="text" asp-for="@Model.categoryVM.CategoryName" class="form-control" id="floatingInput"
+                    placeholder="Name" required>
+                <span asp-validation-for="@Model.categoryVM.CategoryName"
+                    class="text-danger validate RemoveValidationClass"></span>
+                <label for="floatingInput" class="fs-6 text-secondary">Name</label>
+            </div>
+        </div>
+        <div class="modal-footer">
+            <button type="submit" class="btn solid-btn">Save</button>
+            <button type="button" class="btn hollow-btn" data-bs-dismiss="modal">Cancel</button>
+        </div>
+    </form>
+</div>
+
+<script>
+    // Product To Fill data in the Add modal 
+    $("#SaveCategoryForm").on("submit", function (e) {
+        e.preventDefault();
+        let form = $("#SaveCategoryForm");
+        if (form.valid()) {
+            let formData = new FormData(this);
+            $.ajax({
+                url: "/Home/SaveCategory",
+                type: "POST",
+                contentType: false,
+                processData: false,
+                data: formData,
+                success: function (data) {
+                    if (data.success) {
+                        callSuccessToaster(data.text);
+                        LoadCategoryList();
+                        PaginatedData(categoryid, searchText, currentPage, pageSize);
+                        $(".btn-close").click();
+                    } else {
+                        callErrorToaster(data.text);
+                    }
+                }
+            });
+        }
+    })
+</script>

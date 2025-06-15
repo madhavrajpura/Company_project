@@ -1,0 +1,103 @@
+@model DataAccessLayer.ViewModels.MainViewModel
+
+<div class="modal-content">
+    <div class="modal-header">
+        <h5 class="modal-title fs-5 fw-bold text-secondary">@(Model.productVM.ProductId == 0 ? "Add New" : "Edit")
+            Product</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+    </div>
+    <form id="SaveProductForm" enctype="multipart/form-data">
+        <div class="modal-body">
+            <div class="row">
+                <div class="form-floating col-6 p-1">
+                    <input type="hidden" asp-for="@Model.productVM.ProductId" />
+                    <select class="form-select" asp-for="@Model.productVM.CategoryId" id="selectGrpIdDropDown"
+                        aria-label="Floating label select example" asp-items="ViewBag.categoryList">
+                        @* @foreach (var modifier in Model.modifierGroupList)
+                        {
+                            <option value="@modifier.ModifierGrpId">@modifier.ModifierGrpName</option>
+                        } *@
+                    </select>
+                    <label for="selectGrpIdDropDown">Categories</label>
+                </div>
+                <div class="form-floating col-6 p-1">
+                    <input type="text" class="form-control" asp-for="@Model.productVM.ProductName" id="floatingInput"
+                        placeholder="Name" required>
+                    <label for="floatingInput">Name</label>
+                    <span asp-validation-for="@Model.productVM.ProductName" class="text-danger validate"></span>
+                </div>
+
+                <div class="form-floating col-4 p-1">
+                    <input type="text" class="form-control" id="floatingInput" asp-for="@Model.productVM.Price"
+                        placeholder="0" required>
+                    <label for="floatingInput">Price</label>
+                    <span asp-validation-for="@Model.productVM.Price" class="text-danger validate"></span>
+
+                </div>
+                <div class="form-floating col-4 p-1">
+                    <div class="form-check form-switch d-flex justify-content-center align-items-center gap-2 my-lg-0">
+                        <input class="form-check-input fs-3" type="checkbox" role="switch" id="defaultTax"
+                            asp-for="@Model.productVM.IsActive">
+                        <span class="pt-1">Active</span>
+                    </div>
+                </div>
+                <div class="form-floating col-12 p-1">
+                    <textarea class="form-control" asp-for="@Model.productVM.Details" placeholder="Enter some details"
+                        id="floatingTextarea"></textarea>
+                    <label for="floatingTextarea">Details</label>
+                </div>
+                <div class="col-auto border-1 py-2 d-flex justify-content-center">
+                    <label for="uploadFile" class="border border-dashed rounded p-3 text-center w-100">
+                        <span class="d-flex flex-column justify-content-center align-items-center">
+                            <i class="fa-solid fa-cloud-arrow-up fs-2 text-secondary"></i>
+                            <span id="browseFileText">Drag & Drop or Browse
+                                files</span>
+                        </span>
+                    </label>
+                    <input type="file" class="d-none" id="uploadFile" asp-for="@Model.productVM.ImageFile">
+                </div>
+            </div>
+        </div>
+        <div class="modal-footer">
+            <button type="submit" class="btn solid-btn">Save</button>
+            <button type="button" class="btn hollow-btn" data-bs-dismiss="modal">Cancel</button>
+        </div>
+    </form>
+</div>
+
+<partial name="_ValidationScriptsPartial" />
+<partial name="_Toaster" />
+
+<script>
+
+    $("#uploadFile").change(function () {
+        const file = this.files[0];
+        $("#browseFileText").text(file.name);
+    });
+
+    // Product To Fill data in the Add modal 
+    $("#SaveProductForm").on("submit", function (e) {
+        e.preventDefault();
+        let form = $("#SaveProductForm");
+        if (form.valid()) {
+            let formData = new FormData(this);
+            $.ajax({
+                url: "/Home/SaveProduct",
+                type: "POST",
+                contentType: false,
+                processData: false,
+                data: formData,
+                success: function (data) {
+                    if (data.success) {
+                        callSuccessToaster(data.text);
+                        PaginatedData(categoryid, searchText, currentPage, pageSize);
+                        $(".btn-close").click();
+                    } else {
+                        callErrorToaster(data.text);
+                    }
+                }
+            });
+        }
+    });
+
+</script>

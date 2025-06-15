@@ -1,0 +1,35 @@
+@using DataAccessLayer.ViewModels
+@model PaginationViewModel<ProductViewModel>
+
+@if (Model.Items.Count == 0)
+{
+    <tr>
+        <td colspan="6" class="text-center text-danger fw-bold">No Records Found</td>
+    </tr>
+}
+else
+{
+    @foreach (var product in Model.Items)
+    {
+        <tr class="border border-end-0 border-start-0 border-top-0 border-bottom-1">
+            <td class="text-start text-nowrap align-content-center d-flex">
+                <img src="@product.ImageUrl" class="rounded-circle me-2" style="width: 50px; height: 50px;"
+                    alt="@product.ProductName">
+                <p class="mt-2">@product.ProductName</p>
+            </td>
+            <td class="text-center">@product.Price</td>
+            <td class="text-center">@product.IsActive</td>
+            <td class="text-center">
+                <i class="fa-solid fa-pen w-25" data-bs-toggle="modal" data-bs-target="#EditModifierModal"
+                    data-id="@product.ProductId"></i>
+
+                <i class="fa-solid fa-trash-can ms-2 " data-bs-toggle="modal" data-bs-target="#delete-modifier-modal"
+                    data-id="@product.ProductId" onclick=GetIdForDeleteModifierItem(this)></i>
+
+            </td>
+
+        </tr>
+
+    }
+}
+<input type="hidden" id="totalRecordsHidden-modifier" value="@Model.TotalCount" />
